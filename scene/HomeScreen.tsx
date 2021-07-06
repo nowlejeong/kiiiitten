@@ -13,14 +13,31 @@ import {
   Avatar,
   Divider,
   Input,
+  AutocompleteItem,
+  Autocomplete,
 } from "@ui-kitten/components";
 import { ThemeContext } from "../assets/theme-context";
+
+const movies = [
+  { title: "Star Wars" },
+  { title: "Back to the Future" },
+  { title: "The Matrix" },
+  { title: "Inception" },
+  { title: "Interstellar" },
+];
+
+const filter = (item, query) =>
+  item.title.toLowerCase().includes(query.toLowerCase());
+
+const StarIcon = (props) => <Icon {...props} name="star" />;
 
 export const HomeScreen = ({ navigation }: any) => {
   const themeContext = React.useContext(ThemeContext);
   const [value, setValue] = React.useState("");
   const [secureTextEntry, setSecureTextEntry] = React.useState(true);
   const shakeIconRef = React.useRef(null);
+  const [value2, setValue2] = React.useState(null);
+  const [data, setData] = React.useState(movies);
 
   const toggleSecureEntry = () => {
     setSecureTextEntry(!secureTextEntry);
@@ -49,6 +66,30 @@ export const HomeScreen = ({ navigation }: any) => {
     <Icon {...props} ref={shakeIconRef} animation="shake" name="shake" />
   );
 
+  const onSelect = (index) => {
+    setValue(data[index].title);
+  };
+
+  const onChangeText = (query) => {
+    setValue(query);
+    setData(movies.filter((item) => filter(item, query)));
+  };
+
+  const clearInput = () => {
+    setValue("");
+    setData(movies);
+  };
+
+  const renderOption = (item, index) => (
+    <AutocompleteItem key={index} title={item.title} accessoryLeft={StarIcon} />
+  );
+
+  const renderCloseIcon = (props) => (
+    <TouchableWithoutFeedback onPress={clearInput}>
+      <Icon {...props} name="close" />
+    </TouchableWithoutFeedback>
+  );
+
   return (
     <>
       <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -61,13 +102,24 @@ export const HomeScreen = ({ navigation }: any) => {
           accessoryRight={renderInputIcon}
         />
 
-        <View style={styles.details}>
+        <View style={[styles.details, { justifyContent: "center" }]}>
           <Avatar size="giant" source={require("../assets/behance.png")} />
-          <Text style={styles.title} category="h6">
+          <Text style={styles.title} category="h2">
             UI Kitten
           </Text>
         </View>
-        <Divider />
+        {/* <Divider /> */}
+
+        <Autocomplete
+          placeholder="Place your Text"
+          value={value}
+          accessoryRight={renderCloseIcon}
+          onChangeText={onChangeText}
+          onSelect={onSelect}
+          style={{ margin: 20, marginBottom: 0 }}
+        >
+          {data.map(renderOption)}
+        </Autocomplete>
         <Button
           style={styles.installButton}
           onPress={() => navigation.navigate("BottomNavigation")}
